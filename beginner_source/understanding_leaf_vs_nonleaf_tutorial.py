@@ -1,28 +1,26 @@
 """
-Understanding requires_grad, retain_grad, Leaf, and Non-leaf Tensors
+requires_grad, retain_grad, 리프(Leaf), 그리고 논-리프(Non-leaf) 텐서(Tensor)들에 대한 이해
 ====================================================================
 
-**Author:** `Justin Silver <https://github.com/j-silv>`__
+**저자:** `Justin Silver <https://github.com/j-silv>`__
+**번역:** `최도윤 <https://github.com/justjs4evr>`__
 
-This tutorial explains the subtleties of ``requires_grad``,
-``retain_grad``, leaf, and non-leaf tensors using a simple example.
+본 튜토리얼은 하나의 예제를 통해 ``requires_grad``,
+``retain_grad``, 리프, 그리고 논-리프 텐서들의 세부 사항 및 차이를 설명합니다.
 
-Before starting, make sure you understand `tensors and how to manipulate
-them <https://docs.tutorials.pytorch.kr/beginner/basics/tensorqs_tutorial.html>`__.
-A basic knowledge of `how autograd
-works <https://docs.tutorials.pytorch.kr/beginner/basics/autogradqs_tutorial.html>`__
-would also be useful.
+시작하기 전에, `텐서와 텐서 조작법 <https://docs.tutorials.pytorch.kr/beginner/basics/tensorqs_tutorial.html>`_에 대해 이해하고 있는지 확인해 주세요. 
+`Autograd의 작동 원리 <https://docs.tutorials.pytorch.kr/beginner/basics/autogradqs_tutorial.html>`_에 대한 기초 지식도 도움이 됩니다.
 
 """
 
 
 ######################################################################
-# Setup
+# 설정(Setup)
 # -----
 #
-# First, make sure `PyTorch is
-# installed <https://pytorch.org/get-started/locally/>`__ and then import
-# the necessary libraries.
+# 먼저, `PyTorch가 설치 되어 있는지
+# <https://pytorch.org/get-started/locally/>`__ 확인하고,
+# 필요한 라이브러리들을 불러옵니다.
 #
 
 import torch
@@ -30,9 +28,9 @@ import torch.nn.functional as F
 
 
 ######################################################################
-# Next, we instantiate a simple network to focus on the gradients. This
-# will be an affine layer, followed by a ReLU activation, and ending with
-# a MSE loss between prediction and label tensors.
+# 다음으로, 변화도(Gradient)에 집중하기 위해 간단한 네트워크를 구현합시다.
+# Affine 계층과 ReLU 활성화 함수를 거쳐 예측값과 라벨 텐서들
+# 사이의 MSE 손실을 구하는 구조입니다.
 #
 # .. math::
 #
@@ -42,38 +40,37 @@ import torch.nn.functional as F
 #
 #    L = \text{MSE}(\mathbf{y}_{\text{pred}}, \mathbf{y})
 #
-# Note that the ``requires_grad=True`` is necessary for the parameters
-# (``W`` and ``b``) so that PyTorch tracks operations involving those
-# tensors. We’ll discuss more about this in a future
-# `section <#requires-grad>`__.
+# 참고로, 매개변수(``W`` 그리고 ``b``) 텐서들과 관련된 연산을
+# PyTorch가 추적하기 위해선 ``requires_grad=True`` 가 필수입니다.
+# `섹션 <#requires-grad>`__에서 이것에 대해 더 다룰 예정입니다.
 #
 
-# tensor setup
-x = torch.ones(1, 3)                      # input with shape: (1, 3)
-W = torch.ones(3, 2, requires_grad=True)  # weights with shape: (3, 2)
-b = torch.ones(1, 2, requires_grad=True)  # bias with shape: (1, 2)
-y = torch.ones(1, 2)                      # output with shape: (1, 2)
+# 텐서 설정하기
+x = torch.ones(1, 3)                      # (1, 3) 모양의 입력
+W = torch.ones(3, 2, requires_grad=True)  # (3, 2) 모양의 가중치
+b = torch.ones(1, 2, requires_grad=True)  # (1, 2) 모양의 편향
+y = torch.ones(1, 2)                      # (1, 2) 모양의 출력
 
-# forward pass
-z = (x @ W) + b                           # pre-activation with shape: (1, 2)
-y_pred = F.relu(z)                        # activation with shape: (1, 2)
-loss = F.mse_loss(y_pred, y)              # scalar loss
+# 순전파
+z = (x @ W) + b                           # (1, 2) 모양의 활성화 전 단계(pre-activation)
+y_pred = F.relu(z)                        # (1, 2) 모양의 활성화 단계
+loss = F.mse_loss(y_pred, y)              # 스칼라 손실값
 
 
 ######################################################################
-# Leaf vs. non-leaf tensors
+# 리프 vs. 논-리프 텐서들
 # -------------------------
 #
-# After running the forward pass, PyTorch autograd has built up a `dynamic
-# computational
-# graph <https://docs.tutorials.pytorch.kr/beginner/blitz/autograd_tutorial.html#computational-graph>`__
-# which is shown below. This is a `Directed Acyclic Graph
-# (DAG) <https://en.wikipedia.org/wiki/Directed_acyclic_graph>`__ which
-# keeps a record of input tensors (leaf nodes), all subsequent operations
-# on those tensors, and the intermediate/output tensors (non-leaf nodes).
-# The graph is used to compute gradients for each tensor starting from the
-# graph roots (outputs) to the leaves (inputs) using the `chain
-# rule <https://en.wikipedia.org/wiki/Chain_rule>`__ from calculus:
+# 순전파를 수행한 후, PyTorch의 autograd는 아래와 같은 `동적
+# 연산
+# 그래프 <https://docs.tutorials.pytorch.kr/beginner/blitz/autograd_tutorial.html#computational-graph>`__
+# 를 형성했습니다. 이것은 `유향 비순환 그래프(Directed Acyclic Graph, DAG) 
+# <https://en.wikipedia.org/wiki/Directed_acyclic_graph>`__인데,
+# 입력 텐서 (리프 노드)들, 해당 텐서들에 대한 모든 후속 연산,
+# 그리고 중간/출력 텐서 (논-리프 노드)들의 기록을 유지합니다.
+# 이 그래프는 미적분의 `연쇄 법칙 <https://en.wikipedia.org/wiki/Chain_rule>`__을
+# 적용해 그래프의 루트 (출력)부터 리프 (입력)까지
+# 각 텐서의 변화도를 계산하는 데에 사용됩니다:
 #
 # .. math::
 #
@@ -88,9 +85,9 @@ loss = F.mse_loss(y_pred, y)              # scalar loss
 #    \frac{\partial \mathbf{f}_1}{\partial \mathbf{x}}
 #
 # .. figure:: /_static/img/understanding_leaf_vs_nonleaf/comp-graph-1.png
-#    :alt: Computational graph after forward pass
+#    :alt: 순전파 이후의 연산 그래프
 #
-#    Computational graph after forward pass
+#    순전파 이후의 연산 그래프
 #
 # PyTorch considers a node to be a *leaf* if it is not the result of a
 # tensor operation with at least one input having ``requires_grad=True``
@@ -98,6 +95,8 @@ loss = F.mse_loss(y_pred, y)              # scalar loss
 # *non-leaf* (e.g. ``z``, ``y_pred``, and ``loss``). You can verify this
 # programmatically by probing the ``is_leaf`` attribute of the tensors:
 #
+
+#PyTorch는 
 
 # prints True because new tensors are leafs by convention
 print(f"{x.is_leaf=}")
