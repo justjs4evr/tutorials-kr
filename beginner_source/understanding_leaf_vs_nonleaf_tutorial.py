@@ -89,32 +89,28 @@ loss = F.mse_loss(y_pred, y)              # 스칼라 손실값
 #
 #    순전파 이후의 연산 그래프
 #
-# PyTorch considers a node to be a *leaf* if it is not the result of a
-# tensor operation with at least one input having ``requires_grad=True``
-# (e.g. ``x``, ``W``, ``b``, and ``y``), and everything else to be
-# *non-leaf* (e.g. ``z``, ``y_pred``, and ``loss``). You can verify this
-# programmatically by probing the ``is_leaf`` attribute of the tensors:
+# PyTorch는 적어도 하나의 입력이 ``requires_grad=True`` 인
+# 텐서 연산의 결과가 아닌 노드를 *리프*(예: ``x``, ``W``, ``b``, ``y``)로 간주합니다.
+# 그리고 다른 모든 것은 *논-리프*(예: ``z``, ``y_pred``, ``loss``)죠.
+# 텐서의 ``is_leaf`` 속성을 조사하면 확인할 수 있습니다.
 #
 
-#PyTorch는 
-
-# prints True because new tensors are leafs by convention
+# True가 출력됩니다. 관례에 따라 새 탠서는 리프이기 때문입니다.
 print(f"{x.is_leaf=}")
 
-# prints False because tensor is the result of an operation with at
-# least one input having requires_grad=True
+# False가 출력되는데, 이 텐서가 적어도 하나의 입력이 ``requires_grad=True`` 인
+# 연산의 결과이기 때문입니다.
 print(f"{z.is_leaf=}")
 
 
 ######################################################################
-# The distinction between leaf and non-leaf determines whether the
-# tensor’s gradient will be stored in the ``grad`` property after the
-# backward pass, and thus be usable for `gradient
-# descent <https://en.wikipedia.org/wiki/Gradient_descent>`__. We’ll cover
-# this some more in the `following section <#retain-grad>`__.
+# 리프와 논-리프 사이의 차이는 텐서의 변화도가 
+# 역전파 이후 ``grad`` 속성에 저장될 여부를 결정합니다. 
+# 곧, 저장되면 `경사 하강법 <https://en.wikipedia.org/wiki/Gradient_descent>`__
+# 에 사용할 수 있을 것입니다. `이어지는 섹션 <#retain-grad>`__에서 이것을
+# 좀 더 다룰 예정입니다.
 #
-# Let’s now investigate how PyTorch calculates and stores gradients for
-# the tensors in its computational graph.
+# 이제 Pytorch가 연산 그래프에서 텐서의 변화도를 어떻게 계산하고 저장하는 지 살펴봅시다.
 #
 
 
