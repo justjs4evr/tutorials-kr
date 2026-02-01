@@ -118,30 +118,30 @@ print(f"{z.is_leaf=}")
 # ``requires_grad``
 # -----------------
 #
-# To build the computational graph which can be used for gradient
-# calculation, we need to pass in the ``requires_grad=True`` parameter to
-# a tensor constructor. By default, the value is ``False``, and thus
-# PyTorch does not track gradients on any created tensors. To verify this,
-# try not setting ``requires_grad``, re-run the forward pass, and then run
-# backpropagation. You will see:
+# 변화도 계산을 위해 사용될 수 있는 연산 그래프를 만들기 위해서,
+# ``requires_grad=True`` 매개변수를 텐서 생성시 넣어줄
+# 필요가 있습니다. 기본값은 ``False`` 이며, 이때 PyTorch는
+# 어떤 만들어진 텐서들에 대해서도 변화도를 추적하지 않습니다. 이를 검증하기 위해,
+# ``requires_grad``를 설정하지 않고, 순전파와 역전파를 다시 
+# 시행하면 다음과 같은 결과가 나옵니다: 
 #
 # ::
 #
 #    >>> loss.backward()
 #    RuntimeError: element 0 of tensors does not require grad and does not have a grad_fn
 #
-# This error means that autograd can’t backpropagate to any leaf tensors
-# because ``loss`` is not tracking gradients. If you need to change the
-# property, you can call ``requires_grad_()`` on the tensor (notice the \_
-# suffix).
+# 저 에러는 ``loss`` 가 변화도를 추적하지 않고 있기 때문에
+# autograd가 그 어느 리프 텐서들에도 역전파할 수 없다는 것을 의미합니다.
+# 그 속성을 바꾸려면, 텐서에 ``requires_grad_()`` 를 호출할 수 있습니다. (접미사 \_
+# 에 주의하세요).
 #
-# We can sanity check which nodes require gradient calculation, just like
-# we did above with the ``is_leaf`` attribute:
+# ``is_leaf`` 속성을 위에서 확인했던 것처럼, 어떤 노드가 변화도 계산을
+# 필요로 하는지 확인할 수 있습니다.
 #
 
-print(f"{x.requires_grad=}") # prints False because requires_grad=False by default
-print(f"{W.requires_grad=}") # prints True because we set requires_grad=True in constructor
-print(f"{z.requires_grad=}") # prints True because tensor is a non-leaf node
+print(f"{x.requires_grad=}") # False: requires_grad는 False가 기본값이기 때문입니다.
+print(f"{W.requires_grad=}") # True: 생성자에서 requires_grad=True로 두었기 때문입니다.
+print(f"{z.requires_grad=}") # True: 텐서가 논-리프 노드이기 때문입니다.
 
 
 ######################################################################
