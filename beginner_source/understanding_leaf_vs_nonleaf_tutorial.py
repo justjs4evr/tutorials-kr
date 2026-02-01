@@ -145,25 +145,25 @@ print(f"{z.requires_grad=}") # True: 텐서가 논-리프 노드이기 때문입
 
 
 ######################################################################
-# It’s useful to remember that a non-leaf tensor has
-# ``requires_grad=True`` by definition, since backpropagation would fail
-# otherwise. If the tensor is a leaf, then it will only have
-# ``requires_grad=True`` if it was specifically set by the user. Another
-# way to phrase this is that if at least one of the inputs to a tensor
-# requires the gradient, then it will require the gradient as well.
+# 논-리프 텐서가  정의에 따라 ``requires_grad=True`` 를
+# 가지고 있음을 기억하는 것이 중요한데, 아니라면 역전파가 불가능하기
+# 때문입니다. 텐서가 리프라면, 유저가 특별하게 정한 경우에만
+# ``requires_grad=True`` 를 가지고 있겠죠. 한 텐서에 대한 입력 중 적어도 하나가
+# 변화도를 요구하면, 그 텐서 또한 변화도를 요구할 것이라고
+# 달리 말할 수 있습니다.
 #
-# There are two exceptions to this rule:
+# 이 규칙엔 두 예외가 존재합니다:
 #
-# 1. Any ``nn.Module`` that has ``nn.Parameter`` will have
-#    ``requires_grad=True`` for its parameters (see
-#    `here <https://docs.tutorials.pytorch.kr/beginner/basics/quickstart_tutorial.html#creating-models>`__)
-# 2. Locally disabling gradient computation with context managers (see
-#    `here <https://docs.pytorch.org/docs/stable/notes/autograd.html#locally-disabling-gradient-computation>`__)
+# 1. ``nn.Parameter`` 를 가진 모든 ``nn.Module`` 은
+#    그 매개변수들에 대해 ``requires_grad=True`` 를 가질 것입니다.
+#    (`참고 <https://docs.tutorials.pytorch.kr/beginner/basics/quickstart_tutorial.html#creating-models>`__)
+# 2. 컨텍스트 매니저를 사용해 국소적(local)으로 변화도 계산을 비활성화하는 것도 있습니다.
+#    (`참고 <https://docs.pytorch.org/docs/stable/notes/autograd.html#locally-disabling-gradient-computation>`__)
 #
-# In summary, ``requires_grad`` tells autograd which tensors need to have
-# their gradients calculated for backpropagation to work. This is
-# different from which tensors have their ``grad`` field populated, which
-# is the topic of the next section.
+# 요약하자면, ``requires_grad`` 는 역전파가 작동하기 위해서
+# autograd에게 어느 텐서들이 변화도 계산이 필요한지 알려줍니다.
+# 이는 실제로 ``grad`` 필드에 값이 채워지는 텐서가 무엇인지와는 다른 개념인데,
+# 다음 섹션에서 다룰 주제입니다.
 #
 
 
@@ -171,18 +171,18 @@ print(f"{z.requires_grad=}") # True: 텐서가 논-리프 노드이기 때문입
 # ``retain_grad``
 # ---------------
 #
-# To actually perform optimization (e.g. SGD, Adam, etc.), we need to run
-# the backward pass so that we can extract the gradients.
+# 실제로 최적화(SGD, Adam, 등)를 수행하려면, 역전파를 실행해
+# 변화도를 추출할 필요가 있습니다.
 #
 
 loss.backward()
 
 
 ######################################################################
-# Calling ``backward()`` populates the ``grad`` field of all leaf tensors
-# which had ``requires_grad=True``. The ``grad`` is the gradient of the
-# loss with respect to the tensor we are probing. Before running
-# ``backward()``, this attribute is set to ``None``.
+# ``backward()`` 를 호출하면``requires_grad=True`` 를 지닌 
+# 모든 리프 텐서들의 ``grad`` 필드를 채워집니다. ``grad`` 는 우리가 조사하는 
+# 텐서에 대한 손실(loss)의 변화율을 의미합니다. ``backward()`` 를 실행하기 전에는
+# 이 속성이 ``None`` 으로 설정되어 있습니다.
 #
 
 print(f"{W.grad=}")
@@ -190,21 +190,20 @@ print(f"{b.grad=}")
 
 
 ######################################################################
-# You might be wondering about the other tensors in our network. Let’s
-# check the remaining leaf nodes:
+# 네트워크의 다른 텐서들은 어떻게 될까요? 나머지 리프 노드들을
+# 확인해 보겠습니다:
 #
 
-# prints all None because requires_grad=False
+# ``requires_grad=False`` 이므로 모두 None을 출력합니다.
 print(f"{x.grad=}")
 print(f"{y.grad=}")
 
 
 ######################################################################
-# The gradients for these tensors haven’t been populated because we did
-# not explicitly tell PyTorch to calculate their gradient
-# (``requires_grad=False``).
+# PyTorch에 변화도 계산을 명시적으로 요청하지 않았기 때문에(``requires_grad=False``),
+# 이 텐서들의 변화도는 채워지지 않았습니다.
 #
-# Let’s now look at an intermediate non-leaf node:
+# 이제 중간 단계의 논-리프 노드를 살펴보겠습니다:
 #
 
 print(f"{z.grad=}")
