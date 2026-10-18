@@ -116,9 +116,9 @@ print(per_sample_grads[0].shape)
 #
 # ``torch.func.functional_call`` 함수를 가지고 ``nn.Module`` 을 함수처럼 다룰 것입니다.
 #
-# 우선, ``model`` 의 상태를 매개변수와 버퍼, 두 딕셔너리로 추출해야 합니다.
-# 일반적인 PyTorch autograd(예: Tensor.backward(), torch.autograd.grad)를
-# 사용하지 않을 것이기 때문입니다.
+# 우선, ``model`` 의 상태를 매개변수와 버퍼, 두 딕셔너리로 추출합니다.
+# 일반적인 PyTorch Autograd(예: ``Tensor.backward()``, ``torch.autograd.grad``)를
+# 사용하지 않을 것이므로, 각 Tensor에 ``detach()`` 를 적용합니다.
 
 from torch.func import functional_call, vmap, grad
 
