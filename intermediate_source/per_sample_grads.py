@@ -206,8 +206,9 @@ print(f'Per-sample-grads with vmap {with_vmap_timing}')
 get_perf(with_vmap_timing, "vmap", no_vmap_timing, "no vmap")
 
 ######################################################################
-# PyTorch에는 이런 방법보다 성능이 뛰어난 다른 최적화 솔루션
-# (예: https://github.com/pytorch/opacus)들도 존재합니다. 
+# PyTorch에서 샘플별 변화도를 계산하는 다른 최적화된 방법
+# (예: https://github.com/pytorch/opacus)도 있으며, 이들 역시 앞서 각 샘플을
+# 반복문으로 하나씩 처리한 방법보다 성능이 좋습니다.
 # 하지만 ``vmap`` 과 ``grad`` 를 조합하는 것만으로 이 정도의 속도 향상을
 # 이룰 수 있다는 사실이 멋지지 않나요?
 #
